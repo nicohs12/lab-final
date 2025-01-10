@@ -9,6 +9,11 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Test
+      - name: Instalar Node.js
+        uses: actions/setup-node@v3
+        with:
+            node-version: '18'
+
+      - name: Respuesta
         run: |
-          echo "prueba 12:16"
+          echo "Instalado"
