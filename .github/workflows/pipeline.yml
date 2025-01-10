@@ -45,3 +45,27 @@ jobs:
             echo "no se encontro archivo package.json"
             exit 1
           fi
+      
+      - name: Validar Proyecto SonarCloud
+        id: validateProjectOnSonar
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          set +e
+          curl -f -X POST -u "${{ secrets.SONAR_TOKEN }}":" 'https://sonarcloud.io/api/projects/create' \
+            -d "name=${{ github.event.repository.name }}" \
+            -d "project=${{ github.event.repository.name }}" \
+            -d "organization=nhuly-devsecops" \
+            -d "visibility=public"
+          if [ $? -ne 0 ]; then
+            echo "Proyecto ya existe"
+            echo "project_created=false" >> $GITHUB_ENV
+          else
+            echo "Proyecto ${{ github.event.repository.name }} creado exitosamente en SonarCloud"
+            echo "Se establece rama sec-test como rama por defecto"
+            curl -X POST -u "${{ secrets.SONAR_TOKEN }}:" 'https://sonarcloud.io/api/project_branches/rename' \
+              -d "name=sec-test" \
+              -d "project=${{ github.event.repository.name }}"
+            echo "project_created=true" >> $GITHUB_ENV
+          fi
+          set -e
