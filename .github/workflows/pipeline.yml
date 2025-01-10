@@ -36,6 +36,7 @@ jobs:
               npm cache clean --force
               npm install --save-dev sonar-scanner
               echo "dependencia instalada"
+              #validacion install plugin
               cat package.json
             else
               echo "dependencia ya esta instalada"
