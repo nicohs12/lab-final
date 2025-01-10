@@ -80,7 +80,7 @@ jobs:
           echo "Realizando análisis en la rama actual: $BRANCH_NAME..."
           npx sonar-scanner \
             -Dsonar.projectKey=$REPO_NAME \
-            -Dsonar.organization=devsecopsusach \
+            -Dsonar.organization=nhuly-devsecops \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.token=$SONAR_TOKEN \
             -Dsonar.branch.name=$BRANCH_NAME
