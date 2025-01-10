@@ -69,3 +69,18 @@ jobs:
             echo "project_created=true" >> $GITHUB_ENV
           fi
           set -e
+
+      - name: Analisis Branch
+        if: env.project_created == 'false'
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          BRANCH_NAME: ${{ github.ref_name }}
+        run: |
+          echo "Realizando análisis en la rama actual: $BRANCH_NAME..."
+          npx sonar-scanner \
+            -Dsonar.projectKey=$REPO_NAME \
+            -Dsonar.organization=devsecopsusach \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.token=$SONAR_TOKEN \
+            -Dsonar.branch.name=$BRANCH_NAME
