@@ -110,3 +110,22 @@ jobs:
           else
             echo "Quality Gate cumplido y no tiene vulnerabilidades críticas."
           fi
+
+  SCA:
+    needs: SAST
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Valida Projecto - Instala Dep.
+        run: |
+          if [ -f "package.json" ]; then
+          echo "Proyecto utiliza archivo package.json"
+          echo "Instalando dependencias..."
+          npm install
+          else
+            echo "No se encontró package.json."
+          exit 1
+          fi
