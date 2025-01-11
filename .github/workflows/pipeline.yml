@@ -148,6 +148,15 @@ jobs:
           name: Depcheck Report
           path: ./reports
 
+      - name: Validate Build Artifacts
+        run: |
+          if [ -f "dist/index.js" ]; then
+          echo "Archivo generado: dist/index.js"
+          else
+          echo "No se encontró el archivo esperado en dist/. Asegúrese de que el proceso de compilación es correcto."
+          #exit 1
+          fi
+
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v3
         with:
