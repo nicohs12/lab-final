@@ -112,27 +112,31 @@ jobs:
           fi
 
   SCA:
-    needs: SAST
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      needs: SAST
+      runs-on: ubuntu-latest
+      steps:
+        
+        - name: Checkout
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
 
-      - name: Install Dependencies
-        run: |
-          if [ -f "package.json" ]; then
-            npm install
-          else
-            echo "No se encontró package.json"
-            exit 1
-          fi
-
-      - name: Analisis Dependency Check
-        run: |
-          npx npm-audit --audit-level=high || true
-
-      - name: Upload
-        uses: actions/upload-artifact@master
-        with:
-          name: Audit Report
-          path: ./
+        - name: Install Dependency project with NPM
+          run: npm install
+        
+        - name: Depcheck
+          uses: dependency-check/Dependency-Check_Action@main
+          id: Depcheck
+          with:
+            project: '${{ github.event.repository.name }}'
+            path: '.'
+            format: 'HTML'
+            out: 'dependency-check-report.html' 
+            args: > # --failOnCVSS 4
+              --enableRetired
+                    
+        - name: Upload Test results
+          uses: actions/upload-artifact@master
+          with:
+            name: Depcheck report
+            path: ${{github.workspace}}/dependency-check-report.html
