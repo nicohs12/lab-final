@@ -127,11 +127,11 @@ jobs:
             exit 1
           fi
 
-      - name: Run Dependency Check
+      - name: Analisis Dependency Check
         run: |
           npx npm-audit --audit-level=high || true
 
-      - name: Upload Audit Report
+      - name: Upload
         uses: actions/upload-artifact@master
         with:
           name: Audit Report
