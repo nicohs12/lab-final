@@ -113,7 +113,7 @@ jobs:
 
   SCA:
       #needs: SAST
-      runs-on: ubuntu-latest
+      runs-on: ubuntu-24.04
       steps:
         
         - name: Checkout
@@ -139,4 +139,4 @@ jobs:
           uses: actions/upload-artifact@master
           with:
             name: Depcheck report
-            path: ${{github.workspace}}/dependency-check-report.html
+            path: ${{github.workspace}}/Reporte-DepCheck.html
