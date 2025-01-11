@@ -121,7 +121,7 @@ jobs:
           with:
             fetch-depth: 0
 
-        - name: Install Dependency project with NPM
+        - name: Instalar Dependencias con NPM
           run: npm install
         
         - name: Depcheck
@@ -131,11 +131,11 @@ jobs:
             project: '${{ github.event.repository.name }}'
             path: '.'
             format: 'HTML'
-            out: 'dependency-check-report.html' 
+            out: 'Reporte-DepCheck.html' 
             args: > # --failOnCVSS 4
               --enableRetired
                     
-        - name: Upload Test results
+        - name: Subir resultados
           uses: actions/upload-artifact@master
           with:
             name: Depcheck report
