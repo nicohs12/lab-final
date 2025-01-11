@@ -141,3 +141,9 @@ jobs:
             --out ./reports
             --failOnCVSS 7
             --enableRetired
+            
+      - name: Upload Dependency Check Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: Depcheck Report
+          path: ./reports
