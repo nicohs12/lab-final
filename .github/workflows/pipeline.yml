@@ -5,114 +5,114 @@ on:
       - sec-test
 
 jobs:
-  SAST:
-    runs-on: ubuntu-24.04
+  #AST:
+  # runs-on: ubuntu-24.04
 
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+  # steps:
+  #   - name: Checkout Code
+  #     uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
+  #   - name: Set up Node.js
+  #     uses: actions/setup-node@v3
+  #     with:
+  #       node-version: '18'
 
-      - name: Set Environment Variables
-        run: echo "BRANCH_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
+  #   - name: Set Environment Variables
+  #     run: echo "BRANCH_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
 
-        #LINEAS DE VALIDACION
-      - name: Variable
-        run: echo "$BRANCH_NAME"
+  #     #LINEAS DE VALIDACION
+  #   - name: Variable
+  #     run: echo "$BRANCH_NAME"
 
-      - name: Valida variable sonar
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          if [ -f "package.json" ]; then
-            echo "archivo package.json encontrado"
-            echo "verificando conf plugin sonar"
-            if ! grep -q '"sonar-scanner"' package.json; then
-              echo "No se encontro dependencia"
-              npm cache clean --force
-              npm install --save-dev sonar-scanner
-              echo "dependencia instalada"
-              #validacion install plugin
-              cat package.json
-            else
-              echo "dependencia ya esta instalada"
-            fi
-          else
-            echo "no se encontro archivo package.json"
-            exit 1
-          fi
-      
-      - name: Validar Proyecto SonarCloud
-        id: validateProjectOnSonar
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          set +e
-          curl -f -X POST -u "${{ secrets.SONAR_TOKEN }}": 'https://sonarcloud.io/api/projects/create' \
-            -d "name=${{ github.event.repository.name }}" \
-            -d "project=${{ github.event.repository.name }}" \
-            -d "organization=nhuly-devsecops" \
-            -d "visibility=public"
-          if [ $? -ne 0 ]; then
-            echo "Proyecto ya existe"
-            echo "project_created=false" >> $GITHUB_ENV
-          else
-            echo "Proyecto ${{ github.event.repository.name }} creado exitosamente en SonarCloud"
-            echo "Se establece rama sec-test (main) como rama por defecto"
-            curl -X POST -u "${{ secrets.SONAR_TOKEN }}:" 'https://sonarcloud.io/api/project_branches/rename' \
-              -d "name=sec-test" \
-              -d "project=${{ github.event.repository.name }}"
-            echo "project_created=true" >> $GITHUB_ENV
-          fi
-          set -e
+  #   - name: Valida variable sonar
+  #     env:
+  #       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #     run: |
+  #       if [ -f "package.json" ]; then
+  #         echo "archivo package.json encontrado"
+  #         echo "verificando conf plugin sonar"
+  #         if ! grep -q '"sonar-scanner"' package.json; then
+  #           echo "No se encontro dependencia"
+  #           npm cache clean --force
+  #           npm install --save-dev sonar-scanner
+  #           echo "dependencia instalada"
+  #           #validacion install plugin
+  #           cat package.json
+  #         else
+  #           echo "dependencia ya esta instalada"
+  #         fi
+  #       else
+  #         echo "no se encontro archivo package.json"
+  #         exit 1
+  #       fi
+  #   
+  #   - name: Validar Proyecto SonarCloud
+  #     id: validateProjectOnSonar
+  #     env:
+  #       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #     run: |
+  #       set +e
+  #       curl -f -X POST -u "${{ secrets.SONAR_TOKEN }}": 'https://sonarcloud.io/api/projects/create' \
+  #         -d "name=${{ github.event.repository.name }}" \
+  #         -d "project=${{ github.event.repository.name }}" \
+  #         -d "organization=nhuly-devsecops" \
+  #         -d "visibility=public"
+  #       if [ $? -ne 0 ]; then
+  #         echo "Proyecto ya existe"
+  #         echo "project_created=false" >> $GITHUB_ENV
+  #       else
+  #         echo "Proyecto ${{ github.event.repository.name }} creado exitosamente en SonarCloud"
+  #         echo "Se establece rama sec-test (main) como rama por defecto"
+  #         curl -X POST -u "${{ secrets.SONAR_TOKEN }}:" 'https://sonarcloud.io/api/project_branches/rename' \
+  #           -d "name=sec-test" \
+  #           -d "project=${{ github.event.repository.name }}"
+  #         echo "project_created=true" >> $GITHUB_ENV
+  #       fi
+  #       set -e
 
-      - name: Analisis Proyecto
-        if: env.project_created == 'false'
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          REPO_NAME: ${{ github.event.repository.name }}
-          BRANCH_NAME: ${{ github.ref_name }}
-        run: |
-          echo "Realizando análisis en la rama actual: $BRANCH_NAME..."
-          npx sonar-scanner \
-            -Dsonar.projectKey=$REPO_NAME \
-            -Dsonar.organization=nhuly-devsecops \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.token=$SONAR_TOKEN \
-            -Dsonar.branch.name=$BRANCH_NAME
+  #   - name: Analisis Proyecto
+  #     if: env.project_created == 'false'
+  #     env:
+  #       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #       REPO_NAME: ${{ github.event.repository.name }}
+  #       BRANCH_NAME: ${{ github.ref_name }}
+  #     run: |
+  #       echo "Realizando análisis en la rama actual: $BRANCH_NAME..."
+  #       npx sonar-scanner \
+  #         -Dsonar.projectKey=$REPO_NAME \
+  #         -Dsonar.organization=nhuly-devsecops \
+  #         -Dsonar.host.url=https://sonarcloud.io \
+  #         -Dsonar.token=$SONAR_TOKEN \
+  #         -Dsonar.branch.name=$BRANCH_NAME
 
-      - name: Quality Gate
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          REPO_NAME: ${{ github.event.repository.name }}
-        run: |
-          echo "Validando Quality Gate..."
-          analysisId=$(curl -s -u "$SONAR_TOKEN:" \
-            "https://sonarcloud.io/api/ce/component?component=$REPO_NAME" | jq -r '.current.analysisId')
+  #   - name: Quality Gate
+  #     env:
+  #       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #       REPO_NAME: ${{ github.event.repository.name }}
+  #     run: |
+  #       echo "Validando Quality Gate..."
+  #       analysisId=$(curl -s -u "$SONAR_TOKEN:" \
+  #         "https://sonarcloud.io/api/ce/component?component=$REPO_NAME" | jq -r '.current.analysisId')
 
-          qualityGateStatus=$(curl -s -u "$SONAR_TOKEN:" \
-            "https://sonarcloud.io/api/qualitygates/project_status?analysisId=$analysisId" | jq -r '.projectStatus.status')
+  #       qualityGateStatus=$(curl -s -u "$SONAR_TOKEN:" \
+  #         "https://sonarcloud.io/api/qualitygates/project_status?analysisId=$analysisId" | jq -r '.projectStatus.status')
 
-          if [ "$qualityGateStatus" != "OK" ]; then
-            echo "El proyecto no cumple con el Quality Gate: $qualityGateStatus."
-            echo "Verificando..."
-            vulnerabilities=$(curl -s -u "$SONAR_TOKEN:" \
-              "https://sonarcloud.io/api/issues/search?componentKeys=$REPO_NAME&types=VULNERABILITY&severities=CRITICAL,BLOCKER" | jq -r '.total')
+  #       if [ "$qualityGateStatus" != "OK" ]; then
+  #         echo "El proyecto no cumple con el Quality Gate: $qualityGateStatus."
+  #         echo "Verificando..."
+  #         vulnerabilities=$(curl -s -u "$SONAR_TOKEN:" \
+  #           "https://sonarcloud.io/api/issues/search?componentKeys=$REPO_NAME&types=VULNERABILITY&severities=CRITICAL,BLOCKER" | jq -r '.total')
 
-            if [ "$vulnerabilities" -gt 0 ]; then
-              echo "Se encontraron $vulnerabilities vulnerabilidades críticas. No se cumple con los estándares mínimo de seguridad."
-              #exit 1
-            fi
-          else
-            echo "Quality Gate cumplido y no tiene vulnerabilidades críticas."
-          fi
+  #         if [ "$vulnerabilities" -gt 0 ]; then
+  #           echo "Se encontraron $vulnerabilities vulnerabilidades críticas. No se cumple con los estándares mínimo de seguridad."
+  #           #exit 1
+  #         fi
+  #       else
+  #         echo "Quality Gate cumplido y no tiene vulnerabilidades críticas."
+  #       fi
 
   SCA:
-      needs: SAST
+      #needs: SAST
       runs-on: ubuntu-latest
       steps:
         
