@@ -11,6 +11,8 @@ jobs:
    steps:
      - name: Checkout Code
        uses: actions/checkout@v3
+       with:
+            fetch-depth: 0
 
      - name: Set up Node.js
        uses: actions/setup-node@v3
@@ -110,8 +112,7 @@ jobs:
            echo "El proyecto no cumple con el Quality Gate: $qualityGateStatus."
            echo "Verificando vulnerabilidades críticas..."
            vulnerabilities=$(curl -s -u "$SONAR_TOKEN:" \
-             "https://sonarcloud.io/api/issues/search?componentKeys=$REPO_NAME&impactSeverities=CRITICAL,MEDIUM,BLOCKER" | jq -r '.total')
-             #"https://sonarcloud.io/api/issues/search?componentKeys=$REPO_NAME&types=VULNERABILITY&severities=CRITICAL,BLOCKER" | jq -r '.total')
+             "https://sonarcloud.io/api/issues/search?componentKeys=$REPO_NAME&types=VULNERABILITY&severities=CRITICAL,BLOCKER" | jq -r '.total')
 
            if [ "$vulnerabilities" -gt 0 ]; then
              echo "Se encontraron $vulnerabilities vulnerabilidades críticas. El proyecto no cumple con los estándares de seguridad."
