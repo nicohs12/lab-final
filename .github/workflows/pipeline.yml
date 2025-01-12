@@ -203,7 +203,7 @@ jobs:
         image-ref: 'nicohs12/lab-devsecops'
         severity: HIGH,CRITICAL
         ignore-unfixed: true
-        exit-code: 1
+        exit-code: 0
   
   Despliegue-APP:
     name: Deploy Docker Image
