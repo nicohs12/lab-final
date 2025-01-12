@@ -243,4 +243,4 @@ jobs:
       - name: Ejecutar container
         run: |
           Write-Output "Desplegando container......"
-          docker run -d --name lab-final-Nicolas-Huly -p 2612:2612 nicohs12/lab-devsecops      
+          docker run -d --name lab-final-Nicolas-Huly -p 3000:3000 nicohs12/lab-devsecops      
