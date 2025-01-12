@@ -46,8 +46,6 @@ jobs:
              -d "project=$REPO_NAME" \
              -d "organization=$ORG_NAME" \
              -d "visibility=public")
-            echo "$create_response"
-
            if [ "$create_response" -ne 201 ]; then
              echo "Proyecto creado exitosamente (HTTP Response: $create_response)."
            fi
@@ -108,12 +106,11 @@ jobs:
          qualityGateStatus=$(curl -s -u "$SONAR_TOKEN:" \
            "https://sonarcloud.io/api/qualitygates/project_status?analysisId=$analysisId" | jq -r '.projectStatus.status')
 
-         if [ "$qualityGateStatus" != "NONE" ]; then
+         if [ "$qualityGateStatus" != "OK" ]; then
            echo "El proyecto no cumple con el Quality Gate: $qualityGateStatus."
            echo "Verificando vulnerabilidades críticas..."
            vulnerabilities=$(curl -s -u "$SONAR_TOKEN:" \
-             "https://sonarcloud.io/api/issues/search?componentKeys=$REPO_NAME&types=VULNERABILITY&severities=CRITICAL,MEDIUM,BLOCKER" | jq -r '.total')
-            echo "$vulnerabilities"
+             "https://sonarcloud.io/api/issues/search?componentKeys=$REPO_NAME&types=VULNERABILITY&severities=CRITICAL,BLOCKER" | jq -r '.total')
 
            if [ "$vulnerabilities" -gt 0 ]; then
              echo "Se encontraron $vulnerabilities vulnerabilidades críticas. El proyecto no cumple con los estándares de seguridad."
@@ -206,7 +203,7 @@ jobs:
         image-ref: 'nicohs12/lab-devsecops'
         severity: HIGH,CRITICAL
         ignore-unfixed: true
-        exit-code: 0 # 1
+        exit-code: 1
   
   Despliegue-APP:
     name: Deploy Docker Image
