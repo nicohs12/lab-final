@@ -178,3 +178,34 @@ jobs:
     - name: Push Docker
       run: |
         docker push nicohs12/nodejs
+
+  Image-Security:
+    needs: DockerBuild
+    runs-on: ubuntu-24.04
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+          fetch-depth: 0
+      
+    - name: Docker Login
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    
+    - name: Pull Docker
+      run: |
+        docker pull nicohs12/nodejs
+
+    - name: Run Trivy
+      uses: aquasecurity/trivy-action@master
+      id: TrivyScanReport
+      with:
+        scan-type: "image"
+        format: 'table'
+        image-ref: 'nicohs12/nodejs'
+        severity: HIGH,CRITICAL
+        ignore-unfixed: true
+        exit-code: 0 # 1    
