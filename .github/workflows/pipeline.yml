@@ -26,7 +26,7 @@ jobs:
      - name: Variable
        run: echo "$BRANCH_NAME"
 
-       #Codigo clase ayudantia
+       #Test con Codigo clase ayudantia
      - name: Validate SonarCloud Project
        id: eval-sonarcloud
        env:
@@ -62,7 +62,7 @@ jobs:
            echo "project_created=false" >> $GITHUB_ENV
          fi
 
-     - name: Perform Initial Analysis (if Project Created)
+     - name: Perform Initial Analysis
        if: env.project_created == 'true'
        uses: SonarSource/sonarqube-scan-action@v4
        env:
@@ -150,7 +150,7 @@ jobs:
             name: Depcheck report
             path: ${{github.workspace}}/Reporte-DepCheck.html
             
-  DockerBuild:
+  Docker-Build:
     needs: SCA
     runs-on: ubuntu-24.04
     steps:
@@ -175,7 +175,7 @@ jobs:
         docker push nicohs12/lab-devsecops
 
   Image-Security:
-    needs: DockerBuild
+    needs: Docker-Build
     runs-on: ubuntu-24.04
     steps:
 
@@ -203,4 +203,42 @@ jobs:
         image-ref: 'nicohs12/lab-devsecops'
         severity: HIGH,CRITICAL
         ignore-unfixed: true
-        exit-code: 0 # 1    
+        exit-code: 0 # 1
+  
+  Despliegue-APP:
+    name: Deploy Docker Image
+    needs: Image-Security
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+            fetch-depth: 0
+
+      - name: Docker Login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: Pull Docker
+        run: |
+          docker pull nicohs12/lab-devsecops
+      
+      - name: Detiene-Elimina Container Existente
+        run: |
+          $containerName = "lab-final-Nicolas-Huly"
+          $containerStatus = docker ps -a  --filter "name=$containerName" --format "{{.Names}}"
+
+          if ($containerStatus -eq $containerName) {
+              Write-Output "$containerName.... deteniendo"
+              docker stop $containerName
+              docker rm $containerName
+          } else {
+              Write-Output "$containerName no existe"
+          }
+
+      - name: Ejecutar container
+        run: |
+          Write-Output "Desplegando container......"
+          docker run -d --name lab-final-Nicolas-Huly -p 2612:2612 nicohs12/lab-devsecops      
