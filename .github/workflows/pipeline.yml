@@ -36,6 +36,7 @@ jobs:
          echo "Verificando si el proyecto $REPO_NAME existe en SonarCloud..."
          response=$(curl -s -o /dev/null -w "%{http_code}" -u "$SONAR_TOKEN:" \
            "https://sonarcloud.io/api/projects/search?projects=$REPO_NAME")
+         echo "$response"  
 
          if [ "$response" -ne 200 ]; then
            echo "El proyecto no existe. Creándolo en SonarCloud..."
@@ -45,6 +46,7 @@ jobs:
              -d "project=$REPO_NAME" \
              -d "organization=$ORG_NAME" \
              -d "visibility=public")
+            echo "$create_response"
 
            if [ "$create_response" -ne 201 ]; then
              echo "Proyecto creado exitosamente (HTTP Response: $create_response)."
@@ -106,15 +108,16 @@ jobs:
          qualityGateStatus=$(curl -s -u "$SONAR_TOKEN:" \
            "https://sonarcloud.io/api/qualitygates/project_status?analysisId=$analysisId" | jq -r '.projectStatus.status')
 
-         if [ "$qualityGateStatus" != "OK" ]; then
+         if [ "$qualityGateStatus" != "NONE" ]; then
            echo "El proyecto no cumple con el Quality Gate: $qualityGateStatus."
            echo "Verificando vulnerabilidades críticas..."
            vulnerabilities=$(curl -s -u "$SONAR_TOKEN:" \
              "https://sonarcloud.io/api/issues/search?componentKeys=$REPO_NAME&types=VULNERABILITY&severities=CRITICAL,MEDIUM,BLOCKER" | jq -r '.total')
+            echo "$vulnerabilities"
 
            if [ "$vulnerabilities" -gt 0 ]; then
              echo "Se encontraron $vulnerabilities vulnerabilidades críticas. El proyecto no cumple con los estándares de seguridad."
-             exit 0 #exit 1
+             exit 1
            else
              echo "El proyecto cumple con el Quality Gate y no tiene vulnerabilidades críticas." 
            fi
